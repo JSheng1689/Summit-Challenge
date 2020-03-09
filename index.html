@@ -1,0 +1,242 @@
+<!DOCTYPE HTML>
+<html lang = "en">
+<head>
+  <!-- basic.html -->
+  <title>Life Explorer</title>
+  <meta charset = "UTF-8" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.js"></script>
+
+<style>
+  td, h1, p {
+    padding:0 15px;}
+    button {  
+    margin-bottom: 10px;      
+    cursor: pointer;  
+    border-radius: 5px;
+}
+#wrap { 
+	width: 1500px; 
+  margin: 0 auto; 
+}
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+    background-image:url("C:\Users\19174\Desktop\Summit Challenge\templates\static\cool-background.jpg");
+}
+
+</style>
+<!-- Background -->
+<div id='wrap'>
+<body>
+  <h1 class="text-primary">Welcome to Life Explorer</h1>
+  <p id="beginning">
+    Let's explore some of life's experiences!
+  </p>
+  <ol>
+    <font>
+    <li>
+      Activate the map to utilize geolocation (One click is enough).
+    </li>
+    <li>
+      Enter the experience, location, and the number of results you're looking for.
+    </li>
+    <li>
+      Submit and see the places!
+    </li>
+  </font>
+  </ol>
+
+  <table>
+    <tr><td><h6>Click to see your location and other stores -></h6></td>
+      <td style="padding: 0px;"><button class= "geeks" type="button" onclick="getlocation();"> 
+          Activate Map</button></td></tr>
+  </table>
+
+<!-- Search Bars that will call functions on click event-->
+
+<table>
+    <div class="search-container">
+      <form>
+        <div class="form-group">
+          <br> <tr>
+         <td><label for="search">Category:</label></td>
+          <td><input type="text" placeholder="Experience?" id="search" name="search" required></td></tr>
+        </div>
+        
+        <div class="form-group">
+          <tr>
+          <td><label for="location">Location:</label></td>
+          <td><input type="text" placeholder="Where?" id="location" name="location" required></td></tr>
+        </div>
+        <div class="form-group">
+          <tr>
+          <td ><label for="search_limit">Number of Results:</label></td>
+          <td ><input type="text" placeholder="Number of places?" id="limit" name="limit" required></td></tr>
+        </div>
+        <tr><td><button type="button" onclick="request();">Submit</button></td></tr>
+      </form>
+    </div>
+   </table>
+    <div id="results-container">
+    </div>
+<!--Organizing data into table elements for readability-->
+<table>
+   <tr>
+     <td>
+       <div style="text-align: left; padding:10px 15px;" id="names">
+       </div>
+      </td>
+     <td>
+      <div style="text-align: left;padding:0 15px;" id="locations">
+      </div>
+    </td>
+    <td>
+      <div style="text-align: left;padding:0 15px;" id="ratings">
+      </div>
+    </td>
+    <td>
+      <div style="text-align: left;padding:0 15px;" id="prices">
+      </div>
+    </td>
+    <td>
+      <div style="text-align: left;padding:0 15px;" id="phone_numbers">
+      </div>
+    </td>
+  </tr>
+  </table>
+  <div id="map" style="text-align: center;"> 
+  </div> 
+  <br>
+  <br>
+
+ <script src="https://maps.google.com/maps/api/js?sensor=false"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+    var mapg
+    var markers = []
+
+    function request() {
+      // Retrieve values from input
+      term = $('#search').val()
+      loc = $('#location').val()
+      search_limit = $('#limit').val()
+      // If term, loc, or search is empty string, alert required forms need to be filled
+      // Else, all arguments satisfied
+      if (term==='' || loc === '' || search_limit===''){
+        alert("Please fill in all of the fields.")
+      } else {
+
+      $.ajax( {
+        url: 'http://127.0.0.1:5000/search/'+term+'/'+loc+'/'+search_limit,
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+          loadData(data)
+        }
+      })
+    }
+    }
+
+    function loadData(data) {
+      names_container = $('#names')
+      locations_container = $('#locations')
+      ratings_container = $('#ratings')
+      prices_container = $('#prices')
+      phone_container = $('#phone_numbers')
+      console.log(data)
+      //Clears markers on map
+      $.each(markers, function(index, element) {
+        element.setMap(null)
+      })
+      // Clears data after displaying
+      markers = []
+      names_container.empty()
+      locations_container.empty()
+      ratings_container.empty()
+      prices_container.empty()
+      phone_container.empty()
+      //Adding all of the individual elements into table
+      names_container.append($('<h3></h3>').text("Name:"))
+      locations_container.append($('<h3></h3>').text("Location:"))
+      ratings_container.append($('<h3></h3>').text("Rating:"))
+      prices_container.append($('<h3></h3>').text("Price:"))
+      phone_container.append($('<h3></h3>').text("Phone:"))
+      $.each(data.businesses, function(index, element) {  
+        if (typeof element.price === "undefined"){
+          prices_container.append($('<p></p>').text('N/A'))
+        }
+        else{
+          var str = element.price
+          var result = str.fontcolor("green")
+          prices_container.append($('<p> ' + result +'</p>'))
+        }
+        if (element.display_phone === ""){
+          phone_container.append($('<p></p>').text('N/A'))
+        }
+        else{
+          phone_container.append($('<p></p>').text(element.display_phone))
+        }
+        names_container.append($('<a href=' +element.url+' target=_blank>'+element.name+'</p>'))
+        locations_container.append($('<p></p>').text(element.location.address1 + ', ' + element.location.city+ ', ' + element.location.state+', '+element.location.zip_code))
+        ratings_container.append($('<p></p>').text(element.rating + ' ('+ element.review_count +')'))
+        //Adds markers of stores
+        var marker = new google.maps.Marker({
+            position: {lat: element.coordinates.latitude, lng: element.coordinates.longitude},
+            map: mapg,
+            title: element.name
+        
+        });
+        markers.push(marker)
+      })
+      $('#search').val('')
+      $('#location').val('')
+      $("#limit").val('')
+    }
+    //Gets user location
+    function getlocation(){ 
+      document.getElementById('map').style = "width: 40%; height: 400px";
+      if(navigator.geolocation){ 
+          navigator.geolocation.getCurrentPosition(showLoc, errHand); 
+      } 
+    } 
+
+    function showLoc(pos){ 
+      latt = pos.coords.latitude; 
+      long = pos.coords.longitude; 
+      var lattlong = new google.maps.LatLng(latt, long); 
+      var Options = { 
+          center: lattlong, 
+          zoom: 10, 
+          mapTypeControl: true, 
+          navigationControlOptions: {style:google.maps.NavigationControlStyle.SMALL} 
+      } 
+      mapg = new google.maps.Map(document.getElementById("map"), Options); 
+      var markerg =  
+        new google.maps.Marker({position:lattlong, map:mapg, title:"You are here!"}); 
+    } 
+
+    function errHand(err) { 
+      switch(err.code) { 
+          case err.PERMISSION_DENIED: 
+              result.innerHTML = "The application doesn't have the permission"  +  
+                        "to make use of location services" 
+              break; 
+          case err.POSITION_UNAVAILABLE: 
+              result.innerHTML = "The location of the device is uncertain" 
+              break; 
+          case err.TIMEOUT: 
+              result.innerHTML = "The request to get user location timed out" 
+              break; 
+          case err.UNKNOWN_ERROR: 
+              result.innerHTML = "Time to fetch location information exceeded"+ 
+                "the maximum timeout interval" 
+              break; 
+      } 
+    } 
+  </script>
+  </div>
+</body>
+</html>
