@@ -129,7 +129,7 @@ html, body {
       } else {
 
       $.ajax( {
-        url: 'http://127.0.0.1:5000/search/'+term+'/'+loc+'/'+search_limit,
+        url: 'https://api.yelp.com/v3/businesses/search'+term+'/'+loc+'/'+search_limit,
         type: 'GET',
         dataType: 'json',
         success: function(data) {
