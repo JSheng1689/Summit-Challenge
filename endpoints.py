@@ -45,7 +45,7 @@ API_KEY= '7wb8rb94s7h-bl963f5jPrTn7kDfLjlFChxHi47pXgAFKeh0pY2LgK1XKMJR4SjoFZ-jf6
 
 
 # API constants, you shouldn't have to change these.
-API_HOST = ' https://cors-anywhere.herokuapp.com/https://api.yelp.com'
+API_HOST = 'https://api.yelp.com'
 SEARCH_PATH = '/v3/businesses/search'
 BUSINESS_PATH = '/v3/businesses/'  # Business ID will come after slash.
 
